@@ -6,12 +6,13 @@ import (
 	"log"
 	"reflect"
 
+	"sync"
+
 	"github.com/influxdata/telegraf"
 	"github.com/influxdata/telegraf/plugins/outputs"
 	"github.com/signalfx/golib/datapoint"
 	"github.com/signalfx/golib/event"
 	"github.com/signalfx/golib/sfxclient"
-	"sync"
 )
 
 /*SignalFx plugin context*/
@@ -311,10 +312,9 @@ func (s *SignalFx) emitDatapoints() {
 }
 
 func (s *SignalFx) fillAndSendDatapoints(buf []*datapoint.Datapoint) {
+outer:
 	for {
 		select {
-		case <-s.done:
-			return
 		case dp := <-s.dps:
 			buf = append(buf, dp)
 			if len(buf) >= s.BatchSize {
@@ -324,14 +324,15 @@ func (s *SignalFx) fillAndSendDatapoints(buf []*datapoint.Datapoint) {
 				buf = buf[:0]
 			}
 		default:
-			if len(buf) > 0 {
-				if err := s.client.AddDatapoints(s.ctx, buf); err != nil {
-					log.Println("E! Output [signalfx] ", err)
-				}
-			}
-			return
+			break outer
 		}
 	}
+	if len(buf) > 0 {
+		if err := s.client.AddDatapoints(s.ctx, buf); err != nil {
+			log.Println("E! Output [signalfx] ", err)
+		}
+	}
+	return
 }
 
 func (s *SignalFx) emitEvents() {
@@ -349,10 +350,9 @@ func (s *SignalFx) emitEvents() {
 }
 
 func (s *SignalFx) fillAndSendEvents(buf []*event.Event) {
+outer:
 	for {
 		select {
-		case <-s.done:
-			return
 		case e := <-s.evts:
 			buf = append(buf, e)
 			if len(buf) >= s.BatchSize {
@@ -362,14 +362,15 @@ func (s *SignalFx) fillAndSendEvents(buf []*event.Event) {
 				buf = buf[:0]
 			}
 		default:
-			if len(buf) > 0 {
-				if err := s.client.AddEvents(s.ctx, buf); err != nil {
-					log.Println("E! Output [signalfx] ", err)
-				}
-			}
-			return
+			break outer
 		}
 	}
+	if len(buf) > 0 {
+		if err := s.client.AddEvents(s.ctx, buf); err != nil {
+			log.Println("E! Output [signalfx] ", err)
+		}
+	}
+	return
 }
 
 func (s *SignalFx) GetObjects(metrics []telegraf.Metric, dps chan *datapoint.Datapoint, evts chan *event.Event) {
