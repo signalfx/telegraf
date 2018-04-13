@@ -42,7 +42,7 @@ var sampleConfig = `
     ## Ingest URL
     DatapointIngestURL = "https://ingest.signalfx.com/v2/datapoint"
     EventIngestURL = "https://ingest.signalfx.com/v2/event"
-    
+
     ## Exclude metrics by metric name
     Exclude = ["plugin.metric_name", ""]
 
@@ -96,10 +96,10 @@ func (s *SignalFx) Connect() error {
 
 /*Close closes the connection to SignalFx*/
 func (s *SignalFx) Close() error {
-	close(s.done)  /* drain the input channels */
-	s.wg.Wait()    /* wait for the input channels to be drained */
-	s.ctx.Done()   /* safely close the sink context*/
-	s.client = nil /* destroy the client */
+	close(s.done)  // drain the input channels
+	s.wg.Wait()    // wait for the input channels to be drained
+	s.ctx.Done()   // safely close the sink context
+	s.client = nil // destroy the client
 	return nil
 }
 
@@ -333,7 +333,6 @@ outer:
 			log.Println("E! Output [signalfx] ", err)
 		}
 	}
-	return
 }
 
 func (s *SignalFx) emitEvents() {
@@ -372,9 +371,9 @@ outer:
 			log.Println("E! Output [signalfx] ", err)
 		}
 	}
-	return
 }
 
+// GetObjects - converts telegraf metrics to signalfx datapoints and events, and pushes them on to the supplied channels
 func (s *SignalFx) GetObjects(metrics []telegraf.Metric, dps chan *datapoint.Datapoint, evts chan *event.Event) {
 	for _, metric := range metrics {
 		var timestamp = metric.Time()
@@ -430,7 +429,6 @@ func (s *SignalFx) GetObjects(metrics []telegraf.Metric, dps chan *datapoint.Dat
 			}
 		}
 	}
-	return
 }
 
 /*Write call back for writing metrics*/
