@@ -16,7 +16,7 @@ const pluginVersion = "0.0.30"
 var sampleConfig = `
   ## SignalFx metadata plugin reports metadata properties for the host
   ## Process List Collection Settings
-  ## disable process list collection
+  ## boolean indicating whether to emit proccess list information
   # ProcessInfo = true
   ## number of go routines used to collect the process list (must be 1 or greater)
   # NumberOfGoRoutines = 3
@@ -97,6 +97,7 @@ func (s *SFXMeta) Gather(acc telegraf.Accumulator) error {
 	}
 	wg := sync.WaitGroup{}
 	if s.ProcessInfo {
+		log.Println("D! Input [signalfx-metadata] collecting process info")
 		wg.Add(1)
 		go func() {
 			top, err := s.processInfo.GetTop()
