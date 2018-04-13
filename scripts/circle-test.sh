@@ -55,7 +55,7 @@ exit_if_fail make
 
 # Run the tests
 exit_if_fail go vet ./...
-exit_if_fail make docker-run-circle
+# exit_if_fail make docker-run-circle
 # Sleep for OpenTSDB leadership election, aerospike cluster, etc.
 exit_if_fail sleep 60
 exit_if_fail go test -race ./...
