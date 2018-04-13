@@ -96,10 +96,10 @@ func (s *SignalFx) Connect() error {
 
 /*Close closes the connection to SignalFx*/
 func (s *SignalFx) Close() error {
-	s.ctx.Done()
-	s.client = nil
-	close(s.done)
-	s.wg.Wait()
+	close(s.done)  /* drain the input channels */
+	s.wg.Wait() /* wait for the input channels to be drained */
+	s.ctx.Done() /* safely close the sink context*/
+	s.client = nil /* destroy the client */
 	return nil
 }
 
@@ -302,6 +302,7 @@ func (s *SignalFx) emitDatapoints() {
 	for {
 		select {
 		case <-s.done:
+			s.wg.Done()
 			return
 		case dp := <-s.dps:
 			buf = append(buf, dp)
@@ -340,6 +341,7 @@ func (s *SignalFx) emitEvents() {
 	for {
 		select {
 		case <-s.done:
+			s.wg.Done()
 			return
 		case e := <-s.evts:
 			buf = append(buf, e)
