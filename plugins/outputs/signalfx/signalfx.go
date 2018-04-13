@@ -87,10 +87,15 @@ func (s *SignalFx) Connect() error {
 	s.ctx = context.Background()
 	s.dps = make(chan *datapoint.Datapoint, s.ChannelSize)
 	s.evts = make(chan *event.Event, s.ChannelSize)
-	s.wg.Add(1)
-	go s.emitDatapoints()
-	s.wg.Add(1)
-	go s.emitEvents()
+	s.wg.Add(2)
+	go func() {
+		s.emitDatapoints()
+		s.wg.Done()
+	}()
+	go func() {
+		s.emitEvents()
+		s.wg.Done()
+	}()
 	log.Printf("I! Output [signalfx] batch size is %d\n", s.BatchSize)
 	return nil
 }
@@ -303,7 +308,6 @@ func (s *SignalFx) emitDatapoints() {
 	for {
 		select {
 		case <-s.done:
-			s.wg.Done()
 			return
 		case dp := <-s.dps:
 			buf = append(buf, dp)
@@ -341,7 +345,6 @@ func (s *SignalFx) emitEvents() {
 	for {
 		select {
 		case <-s.done:
-			s.wg.Done()
 			return
 		case e := <-s.evts:
 			buf = append(buf, e)
