@@ -97,8 +97,8 @@ func (s *SignalFx) Connect() error {
 /*Close closes the connection to SignalFx*/
 func (s *SignalFx) Close() error {
 	close(s.done)  /* drain the input channels */
-	s.wg.Wait() /* wait for the input channels to be drained */
-	s.ctx.Done() /* safely close the sink context*/
+	s.wg.Wait()    /* wait for the input channels to be drained */
+	s.ctx.Done()   /* safely close the sink context*/
 	s.client = nil /* destroy the client */
 	return nil
 }
