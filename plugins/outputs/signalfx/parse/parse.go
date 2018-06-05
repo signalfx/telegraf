@@ -28,7 +28,7 @@ func GetMetricName(metric string, field string, dims map[string]string) string {
 }
 
 // ModifyDimensions of the metric according to the following rules
-func ModifyDimensions(name string, metricTypeString string, dims map[string]string, props map[string]interface{}) (err error) {
+func ModifyDimensions(name string, dims map[string]string, props map[string]interface{}) (err error) {
 	// If the plugin doesn't define a plugin name use metric.Name()
 	if _, in := dims["plugin"]; !in {
 		dims["plugin"] = name

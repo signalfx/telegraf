@@ -171,7 +171,7 @@ func (s *SignalFx) shouldSkipMetric(metricName string, metricTypeString string, 
 	}
 
 	// Modify the dimensions of the metric and skip the metric if the dimensions are malformed
-	if err := parse.ModifyDimensions(metricName, metricTypeString, metricDims, metricProps); err != nil {
+	if err := parse.ModifyDimensions(metricName, metricDims, metricProps); err != nil {
 		return true
 	}
 
