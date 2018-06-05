@@ -279,6 +279,10 @@ func (s *SignalFx) GetObjects(metrics []telegraf.Metric, dps chan *datapoint.Dat
 				continue
 			}
 
+			// Add common dimensions
+			metricDims["agent"] = "telegraf"
+			metricDims["telegraf_type"] = metricTypeString
+
 			// Get the metric value as a datapoint value
 			if metricValue, err := datapoint.CastMetricValue(val); err == nil {
 				var dp = datapoint.New(metricName,
