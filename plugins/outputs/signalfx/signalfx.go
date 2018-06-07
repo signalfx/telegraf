@@ -219,13 +219,7 @@ func (s *SignalFx) GetObjects(metrics []telegraf.Metric, dps chan *datapoint.Dat
 		var metricType datapoint.MetricType
 		var metricTypeString string
 
-		// patch memory metrics to be gauge
-		if metric.Type() == telegraf.Counter && metric.Name() == "mem" {
-			metricType = datapoint.Gauge
-			metricTypeString = "gauge"
-		} else {
-			metricType, metricTypeString = GetMetricType(metric.Type())
-		}
+		metricType, metricTypeString = GetMetricType(metric.Type())
 
 		for field, val := range metric.Fields() {
 			// Copy the metric tags because they are meant to be treated as
