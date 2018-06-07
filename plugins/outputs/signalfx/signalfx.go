@@ -2,7 +2,6 @@ package signalfx
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"sync"
@@ -24,6 +23,8 @@ type SignalFx struct {
 	EventIngestURL     string
 	Exclude            []string
 	Include            []string
+	exclude            map[string]bool
+	include            map[string]bool
 	ctx                context.Context
 	client             *sfxclient.HTTPSink
 	dps                chan *datapoint.Datapoint
@@ -54,58 +55,32 @@ var sampleConfig = `
 `
 
 // GetMetricType casts a telegraf ValueType to a signalfx metric type
-func GetMetricType(mtype telegraf.ValueType) (metricType datapoint.MetricType, err error) {
+func GetMetricType(mtype telegraf.ValueType) (metricType datapoint.MetricType, metricTypeString string) {
 	switch mtype {
 	case telegraf.Counter:
+		metricTypeString = "counter"
 		metricType = datapoint.Counter
 	case telegraf.Gauge:
+		metricTypeString = "gauge"
 		metricType = datapoint.Gauge
-	case telegraf.Summary, telegraf.Histogram, telegraf.Untyped:
-		metricType = datapoint.Gauge
-		err = fmt.Errorf("histogram, summary, and untyped metrics will be sent as gauges")
-	default:
-		metricType = datapoint.Gauge
-		err = fmt.Errorf("unrecognized metric type defaulting to gauge")
-	}
-	return metricType, err
-}
-
-// GetMetricTypeAsString returns a string representation of telegraf ValueTypes
-func GetMetricTypeAsString(mtype telegraf.ValueType) (metricType string, err error) {
-	switch mtype {
-	case telegraf.Counter:
-		metricType = "counter"
-	case telegraf.Gauge:
-		metricType = "gauge"
 	case telegraf.Summary:
-		metricType = "summary"
-		err = fmt.Errorf("summary metrics will be sent as gauges")
+		metricTypeString = "summary"
+		metricType = datapoint.Gauge
+		log.Println("D! Output [signalfx] GetMetricType() summary metrics will be sent as gauges")
 	case telegraf.Histogram:
-		metricType = "histogram"
-		err = fmt.Errorf("histogram metrics will be sent as gauges")
+		metricTypeString = "histogram"
+		metricType = datapoint.Gauge
+		log.Println("D! Output [signalfx] GetMetricType() histogram metrics will be sent as gauges")
 	case telegraf.Untyped:
-		metricType = "untyped"
-		err = fmt.Errorf("untyped metrics will be sent as gauges")
+		metricTypeString = "untyped"
+		metricType = datapoint.Gauge
+		log.Println("D! Output [signalfx] GetMetricType() untyped metrics will be sent as gauges")
 	default:
-		metricType = "unrecognized"
-		err = fmt.Errorf("unrecognized metric type defaulting to gauge")
+		metricTypeString = "unrecognized"
+		metricType = datapoint.Gauge
+		log.Println("D! Output [signalfx] GetMetricType() unrecognized metric type defaulting to gauge")
 	}
-	return metricType, err
-}
-
-func parseMetricType(metric telegraf.Metric) (metricType datapoint.MetricType, metricTypeString string) {
-	var err error
-	// Parse the metric type
-	metricType, err = GetMetricType(metric.Type())
-	if err != nil {
-		log.Printf("D! GetMetricType() %s {%s}\n", err, metric)
-	}
-
-	metricTypeString, err = GetMetricTypeAsString(metric.Type())
-	if err != nil {
-		log.Printf("D! GetMetricTypeAsString()  %s {%s}\n", err, metric)
-	}
-	return metricType, metricTypeString
+	return
 }
 
 // NewSignalFx - returns a new context for the SignalFx output plugin
@@ -161,21 +136,6 @@ func (s *SignalFx) Close() error {
 	s.wg.Wait()    // wait for the input channels to be drained
 	s.client = nil // destroy the client
 	return nil
-}
-
-func (s *SignalFx) shouldSkipMetric(metricName string, metricTypeString string, metricDims map[string]string, metricProps map[string]interface{}) bool {
-	// Check if the metric is explicitly excluded
-	if excluded := s.isExcluded(metricName); excluded {
-		log.Println("D! Outputs [signalfx] excluding the following metric: ", metricName)
-		return true
-	}
-
-	// Modify the dimensions of the metric and skip the metric if the dimensions are malformed
-	if err := parse.ModifyDimensions(metricName, metricDims, metricProps); err != nil {
-		return true
-	}
-
-	return false
 }
 
 func (s *SignalFx) emitDatapoints() {
@@ -259,29 +219,40 @@ func (s *SignalFx) GetObjects(metrics []telegraf.Metric, dps chan *datapoint.Dat
 		var metricType datapoint.MetricType
 		var metricTypeString string
 
-		metricType, metricTypeString = parseMetricType(metric)
-
 		// patch memory metrics to be gauge
-		if metric.Name() == "mem" && metricType == datapoint.Counter {
+		if metric.Type() == telegraf.Counter && metric.Name() == "mem" {
 			metricType = datapoint.Gauge
 			metricTypeString = "gauge"
+		} else {
+			metricType, metricTypeString = GetMetricType(metric.Type())
 		}
 
 		for field, val := range metric.Fields() {
-			var metricName string
-			var metricProps = make(map[string]interface{})
+			// Copy the metric tags because they are meant to be treated as
+			// immutable
 			var metricDims = metric.Tags()
 
-			// Get metric name
-			metricName = parse.GetMetricName(metric.Name(), field, metricDims)
+			// Generate the metric name
+			var metricName, isSFX = parse.GetMetricName(metric.Name(), field, metricDims)
 
-			if s.shouldSkipMetric(metric.Name(), metricTypeString, metricDims, metricProps) {
+			// Check if the metric is explicitly excluded
+			if excluded := s.isExcluded(metricName); excluded {
+				log.Println("D! Outputs [signalfx] excluding the following metric: ", metricName)
+				continue
+			}
+
+			// If eligible, move the dimension "property" to properties
+			metricProps, propErr := parse.ExtractProperty(metricName, metricDims)
+			if propErr != nil {
+				log.Printf("E! Output [signalfx] %v", propErr)
 				continue
 			}
 
 			// Add common dimensions
 			metricDims["agent"] = "telegraf"
 			metricDims["telegraf_type"] = metricTypeString
+			parse.SetPluginDimension(metric.Name(), metricDims)
+			parse.RemoveSFXDimensions(metricDims)
 
 			// Get the metric value as a datapoint value
 			if metricValue, err := datapoint.CastMetricValue(val); err == nil {
@@ -297,13 +268,13 @@ func (s *SignalFx) GetObjects(metrics []telegraf.Metric, dps chan *datapoint.Dat
 				// Add metric as a datapoint
 				dps <- dp
 			} else {
-				// Skip if it's not an sfx metric and it's not included
-				if _, isSFX := metric.Tags()["sf_metric"]; !isSFX && !s.isIncluded(metricName) {
+				// Skip if it's not an sfx event and it's not included
+				if !isSFX && !s.isIncluded(metricName) {
 					continue
 				}
 
 				// We've already type checked field, so set property with value
-				metricProps["message"] = metric.Fields()[field]
+				metricProps["message"] = val
 				var ev = event.NewWithProperties(metricName,
 					event.AGENT,
 					metricDims,
@@ -328,20 +299,28 @@ func (s *SignalFx) Write(metrics []telegraf.Metric) error {
 
 // isExcluded - checks whether a metric name was put on the exclude list
 func (s *SignalFx) isExcluded(name string) bool {
-	for _, exclude := range s.Exclude {
-		if name == exclude {
-			return true
+	if s.exclude == nil {
+		s.exclude = make(map[string]bool, len(s.Exclude))
+		for _, exclude := range s.Exclude {
+			s.exclude[exclude] = true
 		}
+	}
+	if _, excluded := s.exclude[name]; excluded {
+		return true
 	}
 	return false
 }
 
 // isIncluded - checks whether a metric name was put on the include list
 func (s *SignalFx) isIncluded(name string) bool {
-	for _, include := range s.Include {
-		if name == include {
-			return true
+	if s.include == nil {
+		s.include = make(map[string]bool, len(s.Include))
+		for _, include := range s.Include {
+			s.include[include] = true
 		}
+	}
+	if _, included := s.include[name]; included {
+		return true
 	}
 	return false
 }
