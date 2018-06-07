@@ -3,7 +3,6 @@ package signalfx
 import (
 	"context"
 	"reflect"
-	"sync"
 	"testing"
 	"time"
 
@@ -38,7 +37,6 @@ func TestSignalFx_GetObjects(t *testing.T) {
 		dps                chan *datapoint.Datapoint
 		evts               chan *event.Event
 		done               chan struct{}
-		wg                 sync.WaitGroup
 	}
 	type args struct {
 		datapoints []telegraf.Metric
@@ -132,7 +130,6 @@ func TestSignalFx_GetObjects(t *testing.T) {
 				dps:                tt.fields.dps,
 				evts:               tt.fields.evts,
 				done:               tt.fields.done,
-				wg:                 tt.fields.wg,
 			}
 			s.GetObjects(tt.args.datapoints, tt.args.dps, tt.args.evts)
 			var collectedDatapoints = []*datapoint.Datapoint{}
