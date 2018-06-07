@@ -236,7 +236,7 @@ func (s *SignalFx) GetObjects(metrics []telegraf.Metric, dps chan *datapoint.Dat
 			var metricName, isSFX = parse.GetMetricName(metric.Name(), field, metricDims)
 
 			// Check if the metric is explicitly excluded
-			if excluded := s.isExcluded(metricName); excluded {
+			if s.isExcluded(metricName) {
 				log.Println("D! Outputs [signalfx] excluding the following metric: ", metricName)
 				continue
 			}
@@ -305,10 +305,7 @@ func (s *SignalFx) isExcluded(name string) bool {
 			s.exclude[exclude] = true
 		}
 	}
-	if _, excluded := s.exclude[name]; excluded {
-		return true
-	}
-	return false
+	return s.exclude[name]
 }
 
 // isIncluded - checks whether a metric name was put on the include list
@@ -319,10 +316,7 @@ func (s *SignalFx) isIncluded(name string) bool {
 			s.include[include] = true
 		}
 	}
-	if _, included := s.include[name]; included {
-		return true
-	}
-	return false
+	return s.include[name]
 }
 
 /*init initializes the plugin context*/
