@@ -91,10 +91,10 @@ docker-image:
 	docker build -f scripts/dev.docker --build-arg "package=telegraf*$(COMMIT)*.deb" -t "telegraf-dev:$(COMMIT)" .
 
 windows:
-	docker run --rm -ti -v "$(CURDIR):C:\src" -v "$(CURDIR)\output:C:\output" golang:1.9.2-windowsservercore-ltsc2016 powershell C:\src\scripts\build_sfx.ps1
+	docker run --rm -ti -v "$(CURDIR):C:\src" -v "$(CURDIR)\output:C:\output" golang:1.9.4-windowsservercore-ltsc2016 powershell C:\src\scripts\build_sfx.ps1
 
 linux:
-	docker run --rm -ti -v "$(CURDIR):/src" -v "$(CURDIR)/output:/output" golang:1.9.2 bash /src/scripts/build_sfx.sh
+	docker run --rm -ti -v "$(CURDIR):/src" -v "$(CURDIR)/output:/output" golang:1.9.4 bash /src/scripts/build_sfx.sh
 
 plugins/parsers/influx/machine.go: plugins/parsers/influx/machine.go.rl
 	ragel -Z -G2 $^ -o $@
