@@ -2,8 +2,9 @@ package signalfx
 
 import (
 	"context"
-	"github.com/signalfx/golib/errors"
 	"log"
+
+	"github.com/signalfx/golib/errors"
 
 	"sync"
 
@@ -25,8 +26,12 @@ type SignalFx struct {
 	EventIngestURL     string
 	Exclude            []string
 	Include            []string
+	Counter            []string
+	Count              []string
 	exclude            map[string]bool
 	include            map[string]bool
+	counter            map[string]bool
+	count              map[string]bool
 	ctx                context.Context
 	client             dpsink.Sink
 	dps                chan *datapoint.Datapoint
@@ -95,6 +100,8 @@ func NewSignalFx() *SignalFx {
 		EventIngestURL:     "https://ingest.signalfx.com/v2/event",
 		Exclude:            []string{""},
 		Include:            []string{""},
+		Counter:            []string{""},
+		Count:              []string{""},
 		done:               make(chan struct{}),
 	}
 }
@@ -225,6 +232,12 @@ func (s *SignalFx) GetObjects(metrics []telegraf.Metric, dps chan *datapoint.Dat
 
 		metricType, metricTypeString = GetMetricType(metric.Type())
 
+		if s.isCounter(metric.Name()) {
+			metricType = datapoint.Counter
+		} else if s.isCount(metric.Name()) {
+			metricType = datapoint.Count
+		}
+
 		for field, val := range metric.Fields() {
 			// Copy the metric tags because they are meant to be treated as
 			// immutable
@@ -315,6 +328,28 @@ func (s *SignalFx) isIncluded(name string) bool {
 		}
 	}
 	return s.include[name]
+}
+
+// isCounter - checks whether a metric name was put on the counter list
+func (s *SignalFx) isCounter(name string) bool {
+	if s.counter == nil {
+		s.counter = make(map[string]bool, len(s.Counter))
+		for _, counter := range s.Counter {
+			s.counter[counter] = true
+		}
+	}
+	return s.counter[name]
+}
+
+// isCount - checks whether a metric name was put on the count list
+func (s *SignalFx) isCount(name string) bool {
+	if s.count == nil {
+		s.count = make(map[string]bool, len(s.Count))
+		for _, count := range s.Count {
+			s.count[count] = true
+		}
+	}
+	return s.count[name]
 }
 
 /*init initializes the plugin context*/
