@@ -16,4 +16,17 @@
     ## the SignalFx Metadata Plugin.  If you require a string typed metric
     ## you must specify the metric name in the following list
     Include = ["plugin.metric_name", "plugin2.metric_name"]
+
+    ## When a Telegraf metric type is present, the plugin will map it to the
+    ## closest SignalFx metric type (gauge, count, or counter).  However, many
+    ## Telegraf inputs leave the metrics as untyped, so this plugin then
+    ## defaults to gauge.  If a given metric is a gauge, then all is well.
+    ## However, if the metric is either a counter or a cumulative counter,
+    ## then you can set it with the options below.
+
+    ## Metrics that should be treated as a SignalFx cumulative counter.
+    Counter = ["plugin.metric_name, "plugin2.metric_name"]
+
+    ## Metrics that should be treated as a SignalFx counter.
+    Count = ["plugin.metric_name, "plugin2.metric_name"]
 ```
