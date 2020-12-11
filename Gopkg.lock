@@ -985,7 +985,7 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:8b478b1d29180a608666c36ea8dc160000e3466abb5a5354e571429679e972c0"
+  digest = "1:e3f99bf3af9ced32acceba9fb2bb85f9166b9e950c7f1ac862340de21de75163"
   name = "github.com/shirou/gopsutil"
   packages = [
     "cpu",
@@ -998,16 +998,8 @@
     "process",
   ]
   pruneopts = ""
-  revision = "5335e3fd506df4cb63de0a8239c7461d23063be6"
-  version = "v2.19.05"
-
-[[projects]]
-  branch = "master"
-  digest = "1:99c6a6dab47067c9b898e8c8b13d130c6ab4ffbcc4b7cc6236c2cd0b1e344f5b"
-  name = "github.com/shirou/w32"
-  packages = ["."]
-  pruneopts = ""
-  revision = "bb4de0191aa41b5507caa14b0650cdbddcd9280b"
+  revision = "478eb4c76adf46eb175d1c729e25d0993ee418f3"
+  version = "v3.20.11"
 
 [[projects]]
   digest = "1:8cf46b6c18a91068d446e26b67512cf16f1540b45d90b28b9533706a127f0ca6"
@@ -1510,7 +1502,6 @@
     "github.com/Azure/go-autorest/autorest/azure/auth",
     "github.com/Microsoft/ApplicationInsights-Go/appinsights",
     "github.com/Shopify/sarama",
-    "github.com/StackExchange/wmi",
     "github.com/aerospike/aerospike-client-go",
     "github.com/alecthomas/units",
     "github.com/amir/raidman",

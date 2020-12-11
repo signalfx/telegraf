@@ -148,7 +148,7 @@
 
 [[constraint]]
   name = "github.com/shirou/gopsutil"
-  version = "2.18.12"
+  version = "3.20.10"
 
 [[constraint]]
   name = "github.com/Shopify/sarama"
@@ -157,10 +157,6 @@
 [[constraint]]
   name = "github.com/soniah/gosnmp"
   branch = "master"
-
-[[constraint]]
-  name = "github.com/StackExchange/wmi"
-  version = "1.0.0"
 
 [[constraint]]
   name = "github.com/streadway/amqp"
