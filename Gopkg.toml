@@ -148,7 +148,7 @@
 
 [[constraint]]
   name = "github.com/shirou/gopsutil"
-  version = "2.18.12"
+  version = "3.20.10"
 
 [[constraint]]
   name = "github.com/Shopify/sarama"
@@ -157,10 +157,6 @@
 [[constraint]]
   name = "github.com/soniah/gosnmp"
   branch = "master"
-
-[[constraint]]
-  name = "github.com/StackExchange/wmi"
-  version = "1.0.0"
 
 [[constraint]]
   name = "github.com/streadway/amqp"
@@ -193,6 +189,10 @@
 [[constraint]]
   name = "golang.org/x/sys"
   branch = "master"
+
+[[override]]
+  name = "golang.org/x/sys"
+  revision = "76b94024e4b621e672466e8db3d7f084e7ddcad2"
 
 [[constraint]]
   name = "google.golang.org/grpc"
