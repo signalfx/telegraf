@@ -190,6 +190,10 @@
   name = "golang.org/x/sys"
   branch = "master"
 
+[[override]]
+  name = "golang.org/x/sys"
+  revision = "76b94024e4b621e672466e8db3d7f084e7ddcad2"
+
 [[constraint]]
   name = "google.golang.org/grpc"
   version = "1.12.2"
