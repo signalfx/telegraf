@@ -1,6 +1,8 @@
 # Procstat Input Plugin
 
 The procstat plugin can be used to monitor the system resource usage of one or more processes.
+The procstat_lookup metric displays the query information, 
+specifically the number of PIDs returned on a search
 
 Processes can be selected for monitoring using one of several methods:
 - pidfile
@@ -9,6 +11,7 @@ Processes can be selected for monitoring using one of several methods:
 - user
 - systemd_unit
 - cgroup
+- win_service
 
 ### Configuration:
 
@@ -28,12 +31,18 @@ Processes can be selected for monitoring using one of several methods:
   ## CGroup name or path
   # cgroup = "systemd/system.slice/nginx.service"
 
+  ## Windows service name
+  # win_service = ""
+
   ## override for process_name
   ## This is optional; default is sourced from /proc/<pid>/status
   # process_name = "bar"
 
   ## Field name prefix
   # prefix = ""
+
+  ## When true add the full cmdline as a tag.
+  # cmdline_tag = false
 
   ## Add PID as a tag instead of a field; useful to differentiate between
   ## processes whose tags are otherwise the same.  Can create a large number
@@ -66,6 +75,7 @@ implemented as a WMI query.  The pattern allows fuzzy matching using only
 - procstat
   - tags:
     - pid (when `pid_tag` is true)
+    - cmdline (when 'cmdline_tag' is true)
     - process_name
     - pidfile (when defined)
     - exe (when defined)
@@ -73,7 +83,10 @@ implemented as a WMI query.  The pattern allows fuzzy matching using only
     - user (when selected)
     - systemd_unit (when defined)
     - cgroup (when defined)
+    - win_service (when defined)
   - fields:
+    - child_major_faults (int)
+    - child_minor_faults (int)
     - cpu_time (int)
     - cpu_time_guest (float)
     - cpu_time_guest_nice (float)
@@ -88,12 +101,14 @@ implemented as a WMI query.  The pattern allows fuzzy matching using only
     - cpu_time_user (float)
     - cpu_usage (float)
     - involuntary_context_switches (int)
+    - major_faults (int)
     - memory_data (int)
     - memory_locked (int)
     - memory_rss (int)
     - memory_stack (int)
     - memory_swap (int)
     - memory_vms (int)
+    - minor_faults (int)
     - nice_priority (int)
     - num_fds (int, *telegraf* may need to be ran as **root**)
     - num_threads (int)
@@ -127,6 +142,22 @@ implemented as a WMI query.  The pattern allows fuzzy matching using only
     - voluntary_context_switches (int)
     - write_bytes (int, *telegraf* may need to be ran as **root**)
     - write_count (int, *telegraf* may need to be ran as **root**)
+- procstat_lookup
+  - tags:
+    - exe
+    - pid_finder
+    - pid_file
+    - pattern
+    - prefix
+    - user
+    - systemd_unit
+    - cgroup
+    - win_service
+    - result
+  - fields:
+    - pid_count (int)
+    - running (int)
+    - result_code (int, success = 0, lookup_error = 1)
 
 *NOTE: Resource limit > 2147483647 will be reported as 2147483647.*
 
