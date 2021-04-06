@@ -1,8 +1,8 @@
 # Deprecation Notice
 
-:warning: **Please be advised this project is deprecated.** :warning:
+:warning: **Be advised this project is deprecated.** :warning:
 
-We recommend using the official [telegraf
+Use the official [telegraf
 agent](https://github.com/influxdata/telegraf#installation) with the [signalfx
 output](https://github.com/influxdata/telegraf/tree/master/plugins/outputs/signalfx).
 
