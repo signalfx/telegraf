@@ -116,10 +116,12 @@ func (m *WinServices) Gather(acc telegraf.Accumulator) error {
 	}
 	defer scmgr.Disconnect()
 
+	log.Printf("SWAT! list of services names from monitor: %v", m.ServiceNames)
 	serviceNames, err := listServices(scmgr, m.ServiceNames)
 	if err != nil {
 		return err
 	}
+	log.Printf("SWAT! list of services: %v", serviceNames)
 
 	for _, srvName := range serviceNames {
 		service, err := collectServiceInfo(scmgr, srvName)
@@ -127,10 +129,12 @@ func (m *WinServices) Gather(acc telegraf.Accumulator) error {
 			if IsPermission(err) {
 				log.Printf("D! Error in plugin [inputs.win_services]: %v", err)
 			} else {
+				log.Printf("SWAT! Error in plugin - not permission [inputs.win_services]: %v", err)
 				acc.AddError(err)
 			}
 			continue
 		}
+		log.Printf("SWAT! Processing service: %v", service)
 
 		tags := map[string]string{
 			"service_name": service.ServiceName,
@@ -144,6 +148,7 @@ func (m *WinServices) Gather(acc telegraf.Accumulator) error {
 			"state":        service.State,
 			"startup_mode": service.StartUpMode,
 		}
+		log.Printf("SWAT! field and tags value: %v ; %v", fields, tags)
 		acc.AddFields("win_services", fields, tags)
 	}
 
