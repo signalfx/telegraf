@@ -258,17 +258,6 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:7fdc54859cd901c25b9d8db964410a4e0d98fa0dca267fe4cf49c0eede5e06c2"
-  name = "github.com/denisenkom/go-mssqldb"
-  packages = [
-    ".",
-    "internal/cp",
-  ]
-  pruneopts = ""
-  revision = "1eb28afdf9b6e56cf673badd47545f844fe81103"
-
-[[projects]]
   digest = "1:6098222470fe0172157ce9bbef5d2200df4edde17ee649c5d6e48330e4afa4c6"
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
@@ -1516,7 +1505,6 @@
     "github.com/aws/aws-sdk-go/service/kinesis",
     "github.com/bsm/sarama-cluster",
     "github.com/couchbase/go-couchbase",
-    "github.com/denisenkom/go-mssqldb",
     "github.com/dgrijalva/jwt-go",
     "github.com/docker/docker/api/types",
     "github.com/docker/docker/api/types/container",

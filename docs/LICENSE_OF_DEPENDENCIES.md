@@ -20,7 +20,7 @@ following works:
 - github.com/couchbase/gomemcached [MIT License](https://github.com/couchbase/gomemcached/blob/master/LICENSE)
 - github.com/couchbase/goutils [COUCHBASE INC. COMMUNITY EDITION LICENSE](https://github.com/couchbase/goutils/blob/master/LICENSE.md)
 - github.com/davecgh/go-spew [ISC License](https://github.com/davecgh/go-spew/blob/master/LICENSE)
-- github.com/denisenkom/go-mssqldb [BSD 3-Clause "New" or "Revised" License](https://github.com/denisenkom/go-mssqldb/blob/master/LICENSE.txt)
+- github.com/microsoft/go-mssqldb [BSD 3-Clause "New" or "Revised" License](https://github.com/microsoft/go-mssqldb/blob/main/LICENSE.txt)
 - github.com/dgrijalva/jwt-go [MIT License](https://github.com/dgrijalva/jwt-go/blob/master/LICENSE)
 - github.com/dimchansky/utfbom [Apache License 2.0](https://github.com/dimchansky/utfbom/blob/master/LICENSE)
 - github.com/docker/distribution [Apache License 2.0](https://github.com/docker/distribution/blob/master/LICENSE)
