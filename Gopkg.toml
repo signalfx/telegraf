@@ -179,8 +179,8 @@
   branch = "master"
 
 [[constraint]]
-  name = "github.com/denisenkom/go-mssqldb"
-  branch = "master"
+  name = "github.com/microsoft/go-mssqldb"
+  branch = "main"
 
 [[constraint]]
   name = "golang.org/x/net"
